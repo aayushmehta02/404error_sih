@@ -1,11 +1,11 @@
 body {
-    background: url('../assets/images/breathe.png');
+    background: url('../assets/images/breathe.gif');
     background-repeat: no-repeat;
     background-size: cover;
     margin: 0;
     color:beige;
     font-family: "montserrat",sans-serif; 
-    /* overflow: hidden; */
+    overflow: hidden;
   }
   .nav-links{
     display: flex;

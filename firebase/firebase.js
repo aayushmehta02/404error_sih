@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 
 import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-import { getFirestore, collection, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, updateDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 // Initialize Firebase with your configuration
@@ -70,6 +70,13 @@ async function getDoctors() {
         user.chatId = user.uid + '-' + doc.uid;
         window.localStorage.setItem('uid', JSON.stringify(user));
         updateUser(user);
+        updateDoctor(user.chatId, doc.uid)
+          .then(() => {
+            console.log("Document successfully updated!");
+          })
+          .catch((error) => {
+            console.error("Error updating document: ", error);
+          });
         window.location.href = './userChat.html';
       });
     });
@@ -108,19 +115,32 @@ function getDoctor() {
 async function updateUser(user) {
   const db = getFirestore();
   const docRef = doc(db, "users", user.uid);
-  await updateDoctor(docRef, user.chatId)
-    .then(() => {
-      console.log("Document successfully updated!");
-    })
-    .catch((error) => {
-      console.error("Error updating document: ", error);
-    });
+
 }
 
-async function updateDoctor(docRef, chatId) {
-  await updateDoc(docRef, {
-    patientsList: arrayUnion(chatId),
-  });
+async function updateDoctor(chatId, doctorId) {
+  // check if the current parentList is empty then either add the chatId or create a new array with chatId
+  const db = getFirestore();
+  const docRef = doc(db, "users", doctorId);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data());
+    // if (docSnap.data().patientsList.length === 0) {
+    await updateDoc(docRef, {
+      patientsList: [chatId],
+    });
+    // } else {
+    //   await updateDoc(docRef, {
+    //     patientsList: arrayUnion(chatId),
+    //   });
+    // }
+  } else {
+    // doc.data() will be undefined in this case
+    console.log("No such document!");
+  }
+  // await updateDoc(docRef, {
+  //   patientsList: arrayUnion(chatId),
+  // });
 }
 
 
@@ -138,7 +158,7 @@ function signInUser(email, password) {
           gender: user.gender,
         }
         window.localStorage.setItem('uid', JSON.stringify(storeData));
-        if (data.type === 'user') window.location.href = './userHome.html';
+        if (data.type === 'user') window.location.href = '/userHome.html';
         else window.location.href = './psych_Home.html';
       });
       console.log('user', user);
@@ -157,15 +177,24 @@ async function createChatRoom(userUid, docUid) {
   });
 }
 
-// write a function to contnuously read data from realtime database
-function readChatRoomData(userUid) {
+
+function readChatRoomAsStream(chatId) {
   const db = getDatabase();
-  const chatRoomRef = ref(db, 'chatRooms/' + userUid);
+  const chatRoomRef = ref(db, 'chatRooms/' + chatId);
   onValue(chatRoomRef, (snapshot) => {
     const data = snapshot.val();
     console.log('data', data);
   });
 }
+// function readChatRoomAsStream(chatId) {
+//   const db = getDatabase();
+//   const chatRoomRef = ref(db, 'chatRooms/' + chatId);
+//   onValue(chatRoomRef, (snapshot) => {
+//     const data = snapshot.val();
+//     console.log('im hereee')
+//     console.log('data', data);
+//   });
+// }
 
 function addMessageToRoom(userUid, docUid, message) {
   const db = getDatabase();
@@ -182,6 +211,7 @@ function getUserDetails(uid) {
   const docRef = doc(db, "users", uid);
   getDoc(docRef)
     .then((doc) => {
+      console.log('getuserdetails');
       if (doc.exists()) {
         console.log("Document data:", doc.data());
         return doc.data();
@@ -208,14 +238,6 @@ function addUserToDatabse(user) {
     .then(() => {
       console.log("Document successfully written!");
 
-      // save user data in user collection adn psych data in psych collection
-      setDoc(doc(db, user.type, user.uid), {
-        name: user.name,
-        email: user.email,
-        type: user.type,
-        gender: user.gender,
-        uid: user.uid,
-      }).then(() => { });
 
       var storeData = {
         name: user.name,
@@ -245,6 +267,7 @@ function getCurrentIds() {
         console.log("Document data:", doc.data());
         currentChatId = doc.data().patientsList;
         console.log('currentChatId', currentChatId);
+        return currentChatId;
       } else {
         console.log("No such document!");
         return null;
@@ -304,7 +327,7 @@ if (window.location.href.includes('login.html')) {
 if (window.location.href.includes('userChat.html')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
   console.log('user', user)
-  readChatRoomData(user.chatId);
+  readChatRoomAsStream(user.chatId);
   const sendMessage = document.getElementById('sendMessage');
   sendMessage.addEventListener('click', function () {
     const message = document.getElementById('message').value;
@@ -328,8 +351,19 @@ if (window.location.href.includes('psych_chat')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
   console.log('user', user)
 
-  getCurrentIds();
-  readChatRoomData(user.chatId);
+  var chatIds = getCurrentIds();
+  readChatRoomAsStream(chatIds);
+  const sendMessage = document.getElementById('sendMessage');
+  sendMessage.addEventListener('click', function () {
+    const message = document.getElementById('message').value;
+    addMessageToRoom(user.chatId, user.uid, message);
+  });
+}
+
+if (window.location.href.includes('userChat.html')) {
+  const user = JSON.parse(window.localStorage.getItem('uid'));
+  console.log('user', user)
+  readChatRoomAsStream(user.chatId);
   const sendMessage = document.getElementById('sendMessage');
   sendMessage.addEventListener('click', function () {
     const message = document.getElementById('message').value;
