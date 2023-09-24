@@ -38,7 +38,6 @@ function registerUser(email, password, name, gender, userType) {
       user.gender = gender
       user.uid = user.uid;
       if (user.type === 'doctor') user.patientsList = [];
-      console.log('user', user);
       addUserToDatabse(user);
     })
     .catch((error) => {
@@ -49,7 +48,6 @@ function registerUser(email, password, name, gender, userType) {
 
 // write a function to return a list of users with as a list of DocumentSnapshop where type == Psychiatrist
 async function getDoctors() {
-  console.log('hello');
   const db = getFirestore();
   const usersCol = collection(db, 'users');
   const usersSnapshot = getDocs(usersCol);
@@ -64,8 +62,6 @@ async function getDoctors() {
     getUsers().then(() => {
       removeDoctor();
       var doc = getDoctor();
-      console.log('user.uid', user.uid);
-      console.log('doc.uid', doc.uid);
       createChatRoom(user.uid, doc.uid).then(() => {
         user.chatId = user.uid + '-' + doc.uid;
         window.localStorage.setItem('uid', JSON.stringify(user));
@@ -108,7 +104,6 @@ function removeDoctor() {
 // get a doc1tor randomly from the list of doctors
 function getDoctor() {
   var randomIndex = Math.floor(Math.random() * doctors.length);
-  console.log('doctor', doctors)
   return doctors[randomIndex];
 }
 
@@ -124,9 +119,7 @@ async function updateDoctor(chatId, doctorId) {
   const docRef = doc(db, "users", doctorId);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data());
     if (docSnap.data().patientsList === undefined) {
-      console.log('undefineddddddddd');
       await updateDoc(docRef, {
         patientsList: [chatId],
       });
@@ -148,7 +141,6 @@ function signInUser(email, password) {
     .then((userCredential) => {
       const user = userCredential.user;
       getUserDetails(user.uid).then((data) => {
-        console.log('data', data);
         var storeData = {
           name: user.name,
           email: user.email,
@@ -159,7 +151,6 @@ function signInUser(email, password) {
         if (data.type === 'user') window.location.href = '/userHome.html';
         else window.location.href = './psych_Home.html';
       });
-      console.log('user', user);
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -181,8 +172,32 @@ function readChatRoomAsStream(chatId) {
   const chatRoomRef = ref(db, 'chatRooms/' + chatId);
   onValue(chatRoomRef, (snapshot) => {
     const data = snapshot.val();
-    console.log('data', data);
+    render(new Map(Object.entries(data['messages'])));
   });
+}
+function render(data) {
+  var section;
+  if (window.location.href.includes('psych_chat.html')) {
+    section = document.querySelector(".main_chat_wrapper");
+  }
+  else {
+
+    section = document.querySelector(".chatArea");
+  }
+  section.innerHTML = '';
+
+  for (const [key, value] of data) {
+    const div = document.createElement("div");
+    if (value.senderId === JSON.parse(window.localStorage.getItem('uid')).uid) {
+      div.classList.add("userBubble");
+    } else {
+      div.classList.add("senderBubble");
+    }
+    const p = document.createElement("p");
+    p.textContent = value.message;
+    div.appendChild(p);
+    section.appendChild(div);
+  }
 }
 
 function addMessageToRoom(chatId, message) {
@@ -193,6 +208,21 @@ function addMessageToRoom(chatId, message) {
     senderId: user.uid,
     timeStampe: new Date().getTime(),
   });
+
+
+  const messageFeield = document.getElementById('message');
+  messageFeield.value = '';
+
+  const section = document.querySelector(".chatArea");
+  const div = document.createElement("div");
+  div.classList.add("userBubble ");
+  const p = document.createElement("p");
+  p.textContent = message;
+  div.appendChild(p);
+  section.appendChild(div);
+
+
+
 }
 
 function getUserDetails(uid) {
@@ -200,7 +230,6 @@ function getUserDetails(uid) {
   const docRef = doc(db, "users", uid);
   getDoc(docRef)
     .then((doc) => {
-      console.log('getuserdetails');
       if (doc.exists()) {
         console.log("Document data:", doc.data());
         return doc.data();
@@ -255,9 +284,7 @@ function getCurrentIds() {
   getDoc(docRef)
     .then((doc) => {
       if (doc.exists()) {
-        console.log("Document data:", doc.data());
         currentChatId = doc.data().patientsList;
-        console.log('currentChatId', currentChatId);
         setInterval(() => {
           readChatRoomAsStream(currentChatId);
         }, 1000);
@@ -267,13 +294,11 @@ function getCurrentIds() {
           addMessageToRoom(currentChatId, message);
         });
         const savenote = document.getElementById('savenote');
-        console.log('savenote', savenote);
         savenote.addEventListener('click', function () {
           const notes = document.getElementById('note').value;
           const chatRoomId = JSON.stringify(currentChatId);
 
           const patientUid = chatRoomId.split('-')[1].split('"')[0];
-          console.log('chatRoomId', patientUid);
           addDocNotes(notes, patientUid);
 
         });
@@ -311,7 +336,6 @@ function addJournalEntry(journalEntry) {
         console.error("Error writing document: ", error);
       });
   });
-
 }
 
 function getJournalEnteries() {
@@ -401,24 +425,20 @@ if (window.location.href.includes('login.html')) {
 
 if (window.location.href.includes('userChat.html')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
-  console.log('user', user)
   setInterval(() => {
     readChatRoomAsStream(user.chatId);
   }, 1000);
   const sendMessage = document.getElementById('sendMessage');
   sendMessage.addEventListener('click', function () {
     const message = document.getElementById('message').value;
-    addMessageToRoom(message);
+    addMessageToRoom(user.chatId, message);
   });
 }
-
 
 if (window.location.href.includes('selectDoc.html')) {
   const assignDoc = document.getElementById('assignDoc');
   assignDoc.addEventListener('click', function () {
-    console.log('assignDoc');
     const user = JSON.parse(window.localStorage.getItem('uid'));
-    console.log('user', user);
     getDoctors();
   });
 }
@@ -426,10 +446,8 @@ if (window.location.href.includes('selectDoc.html')) {
 
 if (window.location.href.includes('psych_chat.html')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
-  console.log('user', user)
 
   var chatIds = getCurrentIds();
-  console.log(chatIds)
 }
 
 if (window.location.href.includes('journal.html')) {
@@ -439,3 +457,5 @@ if (window.location.href.includes('journal.html')) {
     addJournalEntry(journalEntry);
   });
 }
+
+export { readChatRoomAsStream, getCurrentIds, getDoctorList };
