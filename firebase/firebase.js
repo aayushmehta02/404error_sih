@@ -321,6 +321,18 @@ function getJournalEnteries() {
     });
 }
 
+function getDoctorList() {
+  const db = getFirestore();
+  const usersCol = collection(db, 'users');
+  const usersSnapshot = getDocs(usersCol);
+  usersSnapshot.then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      if (doc.data().type === 'Psychiatrist')
+        doctors.push(doc.data());
+    });
+  });
+}
+
 if (window.location.href.includes('signup.html')) {
 
   const genderSelect = document.getElementById('gender');
