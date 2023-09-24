@@ -125,22 +125,20 @@ async function updateDoctor(chatId, doctorId) {
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     console.log("Document data:", docSnap.data());
-    // if (docSnap.data().patientsList.length === 0) {
-    await updateDoc(docRef, {
-      patientsList: [chatId],
-    });
-    // } else {
-    //   await updateDoc(docRef, {
-    //     patientsList: arrayUnion(chatId),
-    //   });
-    // }
+    if (docSnap.data().patientsList === undefined) {
+      console.log('undefineddddddddd');
+      await updateDoc(docRef, {
+        patientsList: [chatId],
+      });
+    } else {
+      await updateDoc(docRef, {
+        patientsList: arrayUnion(chatId),
+      });
+    }
   } else {
-    // doc.data() will be undefined in this case
     console.log("No such document!");
   }
-  // await updateDoc(docRef, {
-  //   patientsList: arrayUnion(chatId),
-  // });
+
 }
 
 
@@ -186,20 +184,11 @@ function readChatRoomAsStream(chatId) {
     console.log('data', data);
   });
 }
-// function readChatRoomAsStream(chatId) {
-//   const db = getDatabase();
-//   const chatRoomRef = ref(db, 'chatRooms/' + chatId);
-//   onValue(chatRoomRef, (snapshot) => {
-//     const data = snapshot.val();
-//     console.log('im hereee')
-//     console.log('data', data);
-//   });
-// }
 
-function addMessageToRoom(userUid, docUid, message) {
+function addMessageToRoom(chatId, message) {
   const db = getDatabase();
   const user = JSON.parse(window.localStorage.getItem('uid'));
-  push(ref(db, 'chatRooms/' + user.chatId + '/messages'), {
+  push(ref(db, 'chatRooms/' + chatId + '/messages'), {
     message: message,
     senderId: user.uid,
     timeStampe: new Date().getTime(),
@@ -267,6 +256,14 @@ function getCurrentIds() {
         console.log("Document data:", doc.data());
         currentChatId = doc.data().patientsList;
         console.log('currentChatId', currentChatId);
+        setInterval(() => {
+          readChatRoomAsStream(currentChatId);
+        }, 1000);
+        const sendMessage = document.getElementById('sendMessage');
+        sendMessage.addEventListener('click', function () {
+          const message = document.getElementById('message').value;
+          addMessageToRoom(currentChatId, message);
+        });
         return currentChatId;
       } else {
         console.log("No such document!");
@@ -279,19 +276,6 @@ function getCurrentIds() {
     });
 }
 
-
-function getAllUsers() {
-  console.log('hello');
-
-  const db = getFirestore();
-  const usersCol = collection(db, 'users');
-  const usersSnapshot = getDocs(usersCol);
-  usersSnapshot.then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      console.log(`${doc.id} => ${doc.data()}`);
-    });
-  });
-}
 if (window.location.href.includes('signup.html')) {
 
   const genderSelect = document.getElementById('gender');
@@ -327,11 +311,13 @@ if (window.location.href.includes('login.html')) {
 if (window.location.href.includes('userChat.html')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
   console.log('user', user)
-  readChatRoomAsStream(user.chatId);
+  setInterval(() => {
+    readChatRoomAsStream(user.chatId);
+  }, 1000);
   const sendMessage = document.getElementById('sendMessage');
   sendMessage.addEventListener('click', function () {
     const message = document.getElementById('message').value;
-    addMessageToRoom(user.chatId, user.uid, message);
+    addMessageToRoom(message);
   });
 }
 
@@ -352,21 +338,14 @@ if (window.location.href.includes('psych_chat')) {
   console.log('user', user)
 
   var chatIds = getCurrentIds();
-  readChatRoomAsStream(chatIds);
-  const sendMessage = document.getElementById('sendMessage');
-  sendMessage.addEventListener('click', function () {
-    const message = document.getElementById('message').value;
-    addMessageToRoom(user.chatId, user.uid, message);
-  });
-}
-
-if (window.location.href.includes('userChat.html')) {
-  const user = JSON.parse(window.localStorage.getItem('uid'));
-  console.log('user', user)
-  readChatRoomAsStream(user.chatId);
-  const sendMessage = document.getElementById('sendMessage');
-  sendMessage.addEventListener('click', function () {
-    const message = document.getElementById('message').value;
-    addMessageToRoom(user.chatId, user.uid, message);
-  });
+  console.log(chatIds)
+  // readChatRoomAsStream(chatIds);
+  // setInterval(() => {
+  //   readChatRoomAsStream(chatIds);
+  // }, 1000);
+  // const sendMessage = document.getElementById('sendMessage');
+  // sendMessage.addEventListener('click', function () {
+  //   const message = document.getElementById('message').value;
+  //   addMessageToRoom(chatIds, message);
+  // });
 }

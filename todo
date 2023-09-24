@@ -7,5 +7,5 @@ journaling frontend
 (v) linking everything
 (a) add loaders to everything
 (v) showing alerts on firebase errors
-dynamic routing if logged in
+(him) dynamic routing if logged in
 (h) mood tracker (make chare + analytics + backend)
