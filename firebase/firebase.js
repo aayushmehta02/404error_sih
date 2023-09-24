@@ -276,6 +276,51 @@ function getCurrentIds() {
     });
 }
 
+// add journal entry to the database
+function addJournalEntry(journalEntry) {
+  // save journal enteries in the database based on timestamp
+  const user = JSON.parse(window.localStorage.getItem('uid'));
+  const db = getFirestore();
+  var docRef = doc(db, "journal", user.uid);
+  const timestamp = new Date().getTime();
+  // add the data such a a new doc is created for every journal entry 
+  setDoc(docRef, {
+    lastUpdatedOn: timestamp,
+    lastEntry: journalEntry,
+  }).then(() => {
+    docRef = doc(db, "journal", user.uid + '/entries/' + timestamp);
+    setDoc(docRef, {
+      entry: journalEntry,
+    }).then(() => {
+      console.log("Document successfully written!");
+    })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+  });
+
+}
+
+function getJournalEnteries() {
+  const user = JSON.parse(window.localStorage.getItem('uid'));
+  const db = getFirestore();
+  const docRef = doc(db, "journal", user.uid);
+  getDoc(docRef)
+    .then((doc) => {
+      if (doc.exists()) {
+        console.log("Document data:", doc.data());
+        return doc.data();
+      } else {
+        console.log("No such document!");
+        return null;
+      }
+    })
+    .catch((error) => {
+      console.log("Error getting document:", error);
+      return null;
+    });
+}
+
 if (window.location.href.includes('signup.html')) {
 
   const genderSelect = document.getElementById('gender');
@@ -339,13 +384,13 @@ if (window.location.href.includes('psych_chat')) {
 
   var chatIds = getCurrentIds();
   console.log(chatIds)
-  // readChatRoomAsStream(chatIds);
-  // setInterval(() => {
-  //   readChatRoomAsStream(chatIds);
-  // }, 1000);
-  // const sendMessage = document.getElementById('sendMessage');
-  // sendMessage.addEventListener('click', function () {
-  //   const message = document.getElementById('message').value;
-  //   addMessageToRoom(chatIds, message);
-  // });
+
+}
+
+if (window.location.href.includes('journal.html')) {
+  const submitJournal = document.getElementById('submitJournal');
+  submitJournal.addEventListener('click', function () {
+    const journalEntry = document.getElementById('journalEntry').value;
+    addJournalEntry(journalEntry);
+  });
 }
