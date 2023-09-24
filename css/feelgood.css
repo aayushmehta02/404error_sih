@@ -4,8 +4,13 @@ body{
   font-family: "montserrat",sans-serif;
   background: #ECECF6;
   overflow: hidden;
-width: 100%;
-height: 100vh;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+}
+html{
+  width: 100%;
+  height: 100%;
 }
 .nav-links{
   display: flex;
@@ -55,4 +60,17 @@ p{
   margin: 0;
   padding: 0;
   font-family: "montserrat",sans-serif;
+}
+
+@media screen and (max-width: 480px) {
+  nav{
+    font-size: small !important;
+    width: 100%;
+  }
+  section{
+    display: flex;
+    flex-direction: column;
+    font-size: smaller !important;
+  }
+
 }

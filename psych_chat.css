@@ -4,7 +4,9 @@
     box-sizing: border-box;
     
 }
-
+body{
+    background-color: #efefef;
+}
 .full_body{
     width: 100%;
     display: flex;
@@ -17,6 +19,7 @@
     background-color: beige;
     height: 100vh;
     overflow: scroll;
+    
     
 }
 .left_column::-webkit-scrollbar{
@@ -104,13 +107,18 @@
     justify-content: space-between;
     align-content: center;
     justify-items: center;
+    color: #818182;
+    
 }
 .name_header{
     padding-left: 5%;
     width: 50%;
     font-size: xx-large;
     color: #818182;
+
+    
     font-family: "Montserrat";
+    z-index: 10;
 }
 .chat_screen_wrapper{
     height: 90vh;
@@ -175,6 +183,8 @@
     float: inline-end;
     padding-right: 5%;
     cursor: pointer;
+    z-index: 999;
+    position: static;
 }
 #notes-container {
     display: flex;
@@ -192,6 +202,7 @@
     margin: 10px;
     padding: 10px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    
 }
 
 
@@ -199,3 +210,53 @@
     resize: none;
     
 }
+.senderBubble , .userBubble{
+    display: flex;
+    flex-direction: column;
+        align-items: flex-end;
+    width: 50%;
+    margin: 10px ;
+    position: relative;
+    padding:30px 0;
+    
+  }
+
+.senderBubble p{
+    background-color: #F8F9FA;
+    border-radius: 15px;
+    margin: 10px;
+    left: 0;
+    position: absolute;
+    max-width: 60%;
+    padding: 10px 10px ;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 2;
+  }
+  
+  .userBubble p{
+    right: 10px;
+    position: absolute;
+    padding: 10px 10px ;
+    background-color: #F3D0BA;
+    border-radius: 15px;
+    margin: 10px;
+    max-width: 60%;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    align-items: flex-start;
+}
+.main_chat{
+    background-color: #efefef;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    /* z-index: 1; */
+    top: 10px;
+    margin: 10px 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }

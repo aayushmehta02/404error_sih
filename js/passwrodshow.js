@@ -27,3 +27,26 @@ eye.addEventListener("click", ()=>{
     }
     
 })
+
+
+const selectInput = document.querySelectorAll('.userType')
+const image = document.querySelector('.input_img')
+
+
+selectInput.forEach(function(eachInput){
+    eachInput.addEventListener("click", ()=>{
+        if(eachInput.value=="Psychiatrist"){
+            showImg()
+        }else{
+            hideImg()
+        }
+    })
+})
+
+function showImg(){
+    image.style.display = "block"
+}
+
+function hideImg(){
+    image.style.display = "none"
+}

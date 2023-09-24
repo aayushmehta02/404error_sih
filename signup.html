@@ -41,7 +41,7 @@
             <option value="other">Other</option>
           </select><br>
           <span></span>
-          <select id="userType" name="gender">
+          <select id="userType" name="gender" class="userType">
             <option value="" disabled selected hidden>Select account Type</option>
             <option value="Psychiatrist">Psychiatrist</option>
             <option value="user">User</option>
@@ -53,6 +53,11 @@
           <i class="far fa-eye" id="togglePassword"></i>
         </div> <br>
         <input placeholder="Confirm Password" type="text" id="confirmPassword" name="confirmPassword"><br><br>
+        <div class="input_img" style="display:none">
+          <label for="file-input" style="font-weight: bolder" >UPLAOD AN IMAGE:    </label>
+          <input type="file" accept="image/*"  id="image"><br><br>
+        </div>
+        
       </form>
       <button class="btn" type="submit" id="register">Sign Up</button>
       <p>Already have an account? <a href="login.html">Login</a></p>
@@ -65,6 +70,7 @@
   <div class="split right">
     <img class="brain" src="assets/images/brain.jpg" alt="">
   </div>
+  
   <script src="js/passwrodshow.js"></script>
   <script type="module" src="firebase/firebase.js"></script>
 

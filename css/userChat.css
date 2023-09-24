@@ -39,7 +39,7 @@ header {
     margin: 10px 10px;
     display: flex;
     align-items: center;
-  flex-direction: column;
+    flex-direction: column;
   }
 
 .senderBubble , .userBubble{
