@@ -18,7 +18,10 @@
 </head>
 
 <body>
-    <div id="notes-container"></div>
+    <div id="notes-container" class="note">
+        <textarea id="note" placeholder="Write your note here" class="text_area" rows="10"></textarea>
+        <button onclick="deleteNote(this)">Delete</button> <button id="savenote">Save</button>
+    </div>
     <div class="full_body">
         <div class="left_column">
 
@@ -150,7 +153,7 @@
         </div>
     </div>
     <script type="module" src="firebase/firebase.js" defer></script>
-    <script>
+    <script defer>
         let noteCounter = 0;
 
         function createNote() {
@@ -158,8 +161,9 @@
             const notesContainer = document.getElementById('notes-container');
             const note = document.createElement('div');
             note.className = 'note';
-            note.innerHTML = `<textarea placeholder="Write your note here" class="text_area" rows="10"></textarea>
-                              <button onclick="deleteNote(this)">Delete</button>`;
+            note.innerHTML = `<textarea id="note" placeholder="Write your note here" class="text_area" rows="10"></textarea>
+                              <button onclick="deleteNote(this)">Delete</button> <button id="savenote" onclick="saveNote()">Save</button>`;
+
             notesContainer.appendChild(note);
         }
 

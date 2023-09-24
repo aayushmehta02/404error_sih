@@ -73,11 +73,11 @@ async function getDoctors() {
         updateDoctor(user.chatId, doc.uid)
           .then(() => {
             console.log("Document successfully updated!");
+            window.location.href = './userChat.html';
           })
           .catch((error) => {
             console.error("Error updating document: ", error);
           });
-        window.location.href = './userChat.html';
       });
     });
   });
@@ -250,6 +250,8 @@ function getCurrentIds() {
   const user = JSON.parse(window.localStorage.getItem('uid'));
   const db = getFirestore();
   const docRef = doc(db, "users", user.uid);
+
+
   getDoc(docRef)
     .then((doc) => {
       if (doc.exists()) {
@@ -263,6 +265,17 @@ function getCurrentIds() {
         sendMessage.addEventListener('click', function () {
           const message = document.getElementById('message').value;
           addMessageToRoom(currentChatId, message);
+        });
+        const savenote = document.getElementById('savenote');
+        console.log('savenote', savenote);
+        savenote.addEventListener('click', function () {
+          const notes = document.getElementById('note').value;
+          const chatRoomId = JSON.stringify(currentChatId);
+
+          const patientUid = chatRoomId.split('-')[1].split('"')[0];
+          console.log('chatRoomId', patientUid);
+          addDocNotes(notes, patientUid);
+
         });
         return currentChatId;
       } else {
@@ -333,6 +346,27 @@ function getDoctorList() {
   });
 }
 
+function addDocNotes(notes, patientUid) {
+  const db = getFirestore();
+  var docRef = doc(db, "users", patientUid);
+  const timestamp = new Date().getTime();
+  // add the data such a a new doc is created for every Note entry by the psychatrist
+  setDoc(docRef, {
+    lastUpdatedOn: timestamp,
+    lastEntry: notes,
+  }).then(() => {
+    docRef = doc(db, "users", patientUid + '/notes/' + timestamp);
+    setDoc(docRef, {
+      entry: notes,
+    }).then(() => {
+      console.log("Document successfully written!");
+    })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+  });
+}
+
 if (window.location.href.includes('signup.html')) {
 
   const genderSelect = document.getElementById('gender');
@@ -390,13 +424,12 @@ if (window.location.href.includes('selectDoc.html')) {
 }
 
 
-if (window.location.href.includes('psych_chat')) {
+if (window.location.href.includes('psych_chat.html')) {
   const user = JSON.parse(window.localStorage.getItem('uid'));
   console.log('user', user)
 
   var chatIds = getCurrentIds();
   console.log(chatIds)
-
 }
 
 if (window.location.href.includes('journal.html')) {
