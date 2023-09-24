@@ -188,6 +188,7 @@ function readChatRoomAsStream(chatId) {
 function addMessageToRoom(chatId, message) {
   const db = getDatabase();
   const user = JSON.parse(window.localStorage.getItem('uid'));
+  console.log('user', 'chatRooms/' + chatId + '/messages');
   push(ref(db, 'chatRooms/' + chatId + '/messages'), {
     message: message,
     senderId: user.uid,
@@ -408,10 +409,9 @@ if (window.location.href.includes('userChat.html')) {
   const sendMessage = document.getElementById('sendMessage');
   sendMessage.addEventListener('click', function () {
     const message = document.getElementById('message').value;
-    addMessageToRoom(message);
+    addMessageToRoom(user.chatId, message);
   });
 }
-
 
 if (window.location.href.includes('selectDoc.html')) {
   const assignDoc = document.getElementById('assignDoc');
@@ -439,3 +439,5 @@ if (window.location.href.includes('journal.html')) {
     addJournalEntry(journalEntry);
   });
 }
+
+export { readChatRoomAsStream, getCurrentIds, getDoctorList };
