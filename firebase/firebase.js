@@ -182,7 +182,33 @@ function readChatRoomAsStream(chatId) {
   onValue(chatRoomRef, (snapshot) => {
     const data = snapshot.val();
     console.log('data', data);
+    console.log('messages', new Map(Object.entries(data['messages'])))
+    render(new Map(Object.entries(data['messages'])));
   });
+}
+function render(data) {
+  var section;
+  if (window.location.href.includes('psych_chat.html')) {
+    section = document.querySelector(".main_chat_wrapper");
+  }
+  else {
+
+    section = document.querySelector(".chatArea");
+  }
+  section.innerHTML = '';
+
+  for (const [key, value] of data) {
+    const div = document.createElement("div");
+    if (value.senderId === JSON.parse(window.localStorage.getItem('uid')).uid) {
+      div.classList.add("userBubble");
+    } else {
+      div.classList.add("senderBubble");
+    }
+    const p = document.createElement("p");
+    p.textContent = value.message;
+    div.appendChild(p);
+    section.appendChild(div);
+  }
 }
 
 function addMessageToRoom(chatId, message) {
@@ -194,6 +220,15 @@ function addMessageToRoom(chatId, message) {
     senderId: user.uid,
     timeStampe: new Date().getTime(),
   });
+
+  const section = document.querySelector(".chatArea");
+  const div = document.createElement("div");
+  div.classList.add("userBubble ");
+  const p = document.createElement("p");
+  p.textContent = message;
+  div.appendChild(p);
+  section.appendChild(div);
+
 }
 
 function getUserDetails(uid) {
