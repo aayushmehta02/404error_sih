@@ -172,6 +172,7 @@ function readChatRoomAsStream(chatId) {
   const chatRoomRef = ref(db, 'chatRooms/' + chatId);
   onValue(chatRoomRef, (snapshot) => {
     const data = snapshot.val();
+    console.log(data);
     render(new Map(Object.entries(data['messages'])));
   });
 }

@@ -248,7 +248,7 @@ body{
     z-index: 2;
     align-items: flex-start;
 }
-.main_chat{
+.chatArea{
     background-color: #efefef;
     height: 100%;
     width: 100%;
