@@ -189,10 +189,18 @@ function render(data) {
 
   for (const [key, value] of data) {
     const div = document.createElement("div");
-    if (value.senderId === JSON.parse(window.localStorage.getItem('uid')).uid) {
-      div.classList.add("userBubble");
+    if (window.location.href.includes('psych_chat.html')) {
+      if (value.senderId === JSON.parse(window.localStorage.getItem('uid')).uid) {
+        div.classList.add("senderBubble");
+      } else {
+        div.classList.add("userBubble");
+      }
     } else {
-      div.classList.add("senderBubble");
+      if (value.senderId === JSON.parse(window.localStorage.getItem('uid')).uid) {
+        div.classList.add("userBubble");
+      } else {
+        div.classList.add("senderBubble");
+      }
     }
     const p = document.createElement("p");
     p.textContent = value.message;
