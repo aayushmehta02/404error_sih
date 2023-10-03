@@ -62,15 +62,3 @@ p{
   font-family: "montserrat",sans-serif;
 }
 
-@media screen and (max-width: 480px) {
-  nav{
-    font-size: small !important;
-    width: 100%;
-  }
-  section{
-    display: flex;
-    flex-direction: column;
-    font-size: smaller !important;
-  }
-
-}
