@@ -260,3 +260,7 @@ body{
     align-items: center;
     flex-direction: column;
   }
+
+  .chatArea{
+    overflow: scroll;
+  }
